@@ -46,7 +46,7 @@
           </div>
           <div class="interset-content-footer">
             <div>
-              <i class="iconfont icon-fabulous">
+              <i class="iconfont icon-fabulous" @click="dianzan">
                 <span>{{data.like_num}}</span>
               </i>
             </div>
@@ -62,23 +62,59 @@
             </div>
           </div>
         </div>
-        <div class="pinglun">
-          <div class="new-comment">
-            发表你的看法！
-            <el-input
-              class="gray-bg-input"
-              v-model="newcomment"
-              type="textarea"
-              :rows="3"
-              autofocus
-              placeholder="写下你的评论"
-            ></el-input>
-            <el-button class="btn" type="success" round @click="postcomment">发布</el-button>
-          </div>
-          <h6>最新评论</h6>
-          <h6 v-show="commentData.length==0">没有评论哦~</h6>
-          <v-comment :comments="commentData"></v-comment>
-        </div>
+       <!-- 添加评论开始 -->
+            <div class="addcomment">
+              <h5>说出你的心声吧</h5>
+              <div class="comment-b">
+                <!-- 头像 -->
+                <div class="addcomment-left">
+                  <img :src="touxiang" alt />
+                </div>
+
+                <!-- 输入评论框 -->
+                <div class="addcomment-right">
+                  <div v-if="login">
+                    <textarea
+                      v-model="comment"
+                      class="form-control"
+                      id="exampleFormControlTextarea1"
+                      rows="2"
+                      cols="200"
+                      placeholder="你想说什么呢?"
+                    ></textarea>
+                    <span class="sub" @click="submit()">评论</span>
+                  </div>
+                  <div v-else="login==false ">
+                    <textarea
+                      class="form-control"
+                      id="exampleFormControlTextarea1"
+                      rows="2"
+                      cols="200"
+                      placeholder="请先登陆!"
+                      readonly
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 评论列表开始 -->
+              <div class="comment-list">
+                <div class="new-list">
+                  <h5>最新评论</h5>
+                </div>
+                <div v-for="(item,index) in commentlist" class="comment-main">
+                  <div class="tx">
+                    <img :src="item.avatar" alt />
+                  </div>
+                  <div class="cr">
+                    <div class="u-name">{{item.name}} · {{item.create_time}}</div>
+                    <div class="comment-detail">{{item.content}}</div>
+                  </div>
+                </div>
+                <div class="comment-end">评论已加载完毕～</div>
+              </div>
+              <!-- 评论列表结束 -->
+            </div>
       </div>
 
       <div class="user col-3">
@@ -113,9 +149,10 @@ export default {
       id: this.$route.query.id,
       data: {},
       content: {},
-      commentData: {},
+      commentlist:{},
+      touxiang: {},
       //评论内容
-      newcomment: "",
+     login: true,
       user: {}
     };
   },
@@ -126,35 +163,44 @@ export default {
     vComment
   },
   created() {
+    this.touxiang =JSON.parse(localStorage.getItem("tx"));
     axios.post("http://10.12.80.203/api/Interest/interest_details",{
       id:this.id
     }).then(res=>{
        this.content = res.data.interest_details;
         this.data=res.data
         this.user = res.data.user_data;
-        this.commentData = res.data.comment_list;
+        
+        this.commentlist = res.data.comment_list;
         console.log(this.commentData)
     }).catch(err=>{
 
     })
-    // axios
-    //   .post("http://10.12.80.203/api/Interest/interest_details", {
-    //     id: this.id
-    //   })
-    //   .then(res => {
-    //     this.content = res.article_details;
-    //     this.user = res.data.user_data;
-    //     this.commentData = res.data.comment_list;
-    //     //    for (var i = 0; i < this.data.length; i++) {
-    //     //   if (this.data[i].id == this.id) {
-    //     //     this.content = this.data[i];
-    //     //   }
-    //     // }
-    //   })
-    //   .catch(err => {});
+
   },
   methods: {
-    postcomment() {
+    dianzan(){
+      axios.post("http://10.12.80.203/api/Comment/add_like",{
+        interest_id:this.id,
+         send_user_id: localStorage.getItem("userid")
+      }).then(res=>{
+           this.$message({
+                message: "点赞成功！",
+                type: "success",
+                offset: "80"
+              });
+        axios
+                .post("http://10.12.80.203/api/Interest/interest_details", {
+                  id: this.id
+                })
+                .then(res => {
+                 this.data=res.data
+                });
+      }).catch(err=>{
+
+      })
+    },
+   submit() {
       if (
         localStorage.getItem("login") == null ||
         localStorage.getItem("login") == "false"
@@ -165,18 +211,157 @@ export default {
           offset: "80"
         });
       } else {
-        //上传评论
-        axios
-          .post("", {})
-          .then(res => {})
-          .catch(err => {});
+        if (
+          document.getElementById("exampleFormControlTextarea1").value != ""
+        ) {
+          // 提交评论
+          //msg换成后台地址
+          axios
+            .post("http://10.12.80.203/api/Comment/add_Comment", {
+              content: this.comment,
+              //文章id
+              interest_id: this.id,
+              //用户id
+              send_user_id: localStorage.getItem("userid")
+            })
+            .then(res => {
+              axios
+                .post("http://10.12.80.203/api/Interest/interest_details", {
+                  id: this.id
+                })
+                .then(res => {
+                  this.commentlist = res.data.comment_list;
+                });
+              this.comment = "";
+              this.$message({
+                message: "发布成功！",
+                type: "success",
+                offset: "80"
+              });
+            })
+            .catch(e => {
+              this.$message({
+                message: "评论失败！",
+                type: "warning",
+                offset: "80"
+              });
+            });
+        } else {
+          this.$message({
+            message: "评论不能为空",
+            type: "warning",
+            offset: "80"
+          });
+        }
       }
-      console.log(this.newcomment);
     }
   }
 };
 </script>
 <style scoped lang="scss">
+
+.addcomment {
+  margin-top: 80px;
+  color: #666666;
+  h5 {
+    font-size: 14px;
+  }
+}
+.comment-b {
+  display: flex;
+}
+.addcomment-left {
+  width: 60px;
+  height: 60px;
+  margin-top: 20px;
+  img {
+    border-radius: 50%;
+    width: 60px;
+    min-width: 60px;
+    height: 60px;
+    border: 2px solid #ffffff;
+  }
+}
+.addcomment-right {
+  margin-top: 20px;
+  margin-left: 20px;
+}
+.form-control {
+  background: #f5f5f5;
+  border-radius: 2px;
+  padding: 20px;
+  font-size: 12px;
+  color: #999999;
+  outline: none;
+  border: none;
+  resize: none;
+}
+.sub {
+  float: right;
+  background: linear-gradient(360deg, #7bc5e8 0%, #46b0ee 100%);
+  width: 80px;
+  border-radius: 100px;
+  color: #fff;
+  margin: 0;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  margin-top: 8px;
+  border: 0px;
+  cursor: pointer;
+  &:hover {
+    box-shadow: 0px 2px 2px 0px #46b0ee;
+  }
+}
+.new-list {
+  border-bottom: 1px dashed #e5e5e5;
+}
+/* 评论列表 */
+.comment-list {
+  color: #666666;
+  margin-top: 50px;
+}
+.comment-main {
+  display: flex;
+  border-bottom: 1px dashed #e5e5e5;
+  padding-bottom: 25px;
+  padding-top: 10px;
+}
+.u-name {
+  color: #999999;
+  font-size: 12px;
+  margin-top: 5px;
+}
+.cr {
+      margin-left: 30px;
+    margin-top: 10px;
+}
+.comment-detail {
+  margin-top: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.tx {
+  width: 40px;
+  height: 40px;
+  margin-top: 10px;
+  img {
+    border-radius: 50%;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    border: 2px solid #ffffff;
+  }
+}
+.comment-end {
+  width: 140px;
+  margin: 40px auto;
+  color: #999999;
+  font-size: 12px;
+}
 .gray-bg-input {
   margin-top: 10px;
 }
@@ -340,8 +525,9 @@ span {
   cursor: pointer;
 }
 .imf {
-  margin-top: 8px;
-  margin-left: 8px;
+  margin-top: 18px;
+    margin-left: 25px;
+
 }
 .user_name {
   font-size: 14px;

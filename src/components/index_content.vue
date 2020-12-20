@@ -124,7 +124,7 @@
           <div class="col main">
             <!-- 活动卡片 -->
             <el-col :span="8" v-for="(item,index) in xingqu" :key="index">
-              <el-card shadow="hover" @click.native="toxianzhi(item.id)">
+              <el-card shadow="hover" @click.native="tohuodong(item.id)">
                 <el-image :src="item.img"></el-image>
                 <div class="title">{{item.name}}</div>
                 <div class="time"><div>开始时间：{{item.start_time}}</div><div>结束时间：{{item.end_time}}</div></div>
@@ -169,8 +169,18 @@ export default {
     });
   },
   methods: {
+    tohuodong(id){
+       this.$router.push({
+        path: "activity_detail",
+        query: { id: id }
+      });
+    },
     toxianzhi(id) {
       //跳转闲置页面
+       this.$router.push({
+        path: "xianzhi_detail",
+        query: { id: id }
+      });
     },
     dowm(index) {
       //将点击的元素的索引赋值给变量

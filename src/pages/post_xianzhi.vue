@@ -4,21 +4,41 @@
     <div class="idle-top-wap">
       <div class="idle-top">
         <div class="left">
-          <h5>发布问题</h5>
-          <span>我都想笑了</span>
+          <h5>发布垃圾</h5>
+          <span>让别人买你的垃圾吧</span>
         </div>
         <div class="t_title">
           <i class="iconfont icon-smile"></i>
-          <span>说出你的问题吧</span>
+          <span>收！</span>
         </div>
       </div>
     </div>
     <div class="container">
+         <el-upload
+         class="upload"
+          action="http://10.12.80.203/api/base/upload"
+          :show-file-list="true"
+          list-type="picture-card"
+          :accept="'image/*'"
+          :on-success="handleSuccess"
+           :limit="1"
+        >
+          <el-button type="primary" size="medium" >上传商品图片</el-button>
+        </el-upload>
       <el-form label-width="80px" :model="formLabel">
-        <el-form-item label="问题标题">
+        <el-form-item label="闲置标题">
           <el-input v-model="formLabel.title" placeholder="请输入你的标题"></el-input>
         </el-form-item>
-        <el-form-item label="问题内容">
+        <el-form-item label="闲置价格">
+          <el-input v-model="formLabel.price" placeholder="请输入你的价格"></el-input>
+        </el-form-item>
+         <el-form-item label="咸鱼链接">
+          <el-input v-model="formLabel.link" placeholder="请输入你的链接"></el-input>
+        </el-form-item>
+        <el-form-item label="闲置描述">
+          <el-input v-model="formLabel.description" placeholder="请输入你的商品描述"></el-input>
+        </el-form-item>
+        <el-form-item label="闲置内容">
           <el-input
             type="textarea"
             placeholder="请输入内容，最多两百字哦~"
@@ -31,7 +51,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="sub">立即提问</el-button>
+          <el-button type="primary" @click="sub">立即发布</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -47,8 +67,13 @@ export default {
     return {
       formLabel: {
         title: "",
-        textarea: ""
-      }
+        textarea: "",
+        description:"",
+        price:"",
+        link:""
+
+      },
+      bannerUrl:{},
     };
   },
   components: {
@@ -57,6 +82,10 @@ export default {
   },
   created() {},
   methods: {
+        handleSuccess: function(result) {
+      this.bannerUrl = result.data[0];
+      console.log(result.data[0]);
+    },
     onInput(){
      this.$forceUpdate();
 },
@@ -72,12 +101,16 @@ export default {
           offset: "80"
         });
       } else {
+          console.log(this.bannerUrl)
         axios
-          .post("http://10.12.80.203/api/question/add_question", {
-           
-              content: this.formLabel.title,
-              description: this.textarea,
-              user_id:localStorage.getItem("userid")
+          .post("http://10.12.80.203/api/Idle/add_idle", {
+              img:this.bannerUrl,
+              title: this.formLabel.title,
+              content:this.formLabel.textarea,
+              price:this.formLabel.price,
+              description: this.formLabel.description,
+              user_id:localStorage.getItem("userid"),
+              link:this.formLabel.link
           })
           .then(res => {
             if(res.data.code){
@@ -108,6 +141,10 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.upload{
+    margin-top: 50px;
+    margin-left: 40%;
+}
 .el-form {
   margin-top: 50px;
   width: 500px;

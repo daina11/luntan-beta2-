@@ -3,7 +3,7 @@
     <v-head></v-head>
     <div>
       <div class="tags-detail-top-img">
-        <img :src="topimg.img" alt />
+        <img src="../assets/img/hw.jpg" alt />
       </div>
     </div>
     <div class="container">
@@ -156,7 +156,7 @@ export default {
   img {
     width: 100%;
     height: 290px;
-    filter: blur(10px);
+    filter: blur(30px);
   }
 }
 .xx {

@@ -24,21 +24,22 @@
           <div class="main-q">
             <div class="m-top">
               <div class="tx">
-                <img :src="question.pimg" alt />
+                <img :src="question.user_avatar" alt />
               </div>
               <div class="top-r">
-                <div class="p-name">{{question.pname}}</div>
-                <div class="p-log">{{question.ulog}}</div>
+                <div class="p-name">{{question.user_name}}</div>
+                <div class="p-log">{{question.create_time}}</div>
                 <div class="content1">{{question.content}}</div>
+                <div class="content1">{{question.description}}</div>
                 <div class="m-bottom">
                   <div>
                     <i class="iconfont icon-fabulous">
-                      <span>{{question.like}}</span>
+                      <span>{{data.like_num}}</span>
                     </i>
                   </div>
                   <div>
                     <i class="iconfont icon-comment">
-                      <span>{{question.pnumber}}</span>
+                      <span>{{data.comment_num}}</span>
                     </i>
                   </div>
                   <div>
@@ -49,18 +50,17 @@
                 </div>
               </div>
             </div>
-             
           </div>
-          
+
           <!-- 评论列表开始 -->
-              <div class="comment-list">
-                  <!-- 添加评论开始 -->
+          <div class="comment-list">
+            <!-- 添加评论开始 -->
             <div class="addcomment">
               <h5>说出你的心声吧</h5>
               <div class="comment-b">
                 <!-- 头像 -->
                 <div class="addcomment-left">
-                  <img src="../assets/img/tx.png" alt />
+                  <img :src="toptx" alt />
                 </div>
 
                 <!-- 输入评论框 -->
@@ -88,24 +88,23 @@
                   </div>
                 </div>
               </div>
-
             </div>
             <!-- 添加评论结束 -->
-                <div class="new-list">
-                  <h5>最新评论</h5>
-                </div>
-                <div v-for="(item,index) in answer" class="comment-main">
-                  <div class="tx">
-                    <img :src="item.txurl" alt />
-                  </div>
-                  <div class="cr">
-                    <div class="u-name">{{item.username}} · {{item.time}}</div>
-                    <div class="comment-detail">{{item.content}}</div>
-                  </div>
-                </div>
-                <div class="comment-end">评论已加载完毕～</div>
+            <div class="new-list">
+              <h5>最新评论</h5>
+            </div>
+            <div v-for="(item,index) in answer" class="comment-main">
+              <div class="tx">
+                <img :src="item.avatar" alt />
               </div>
-              <!-- 评论列表结束 -->
+              <div class="cr">
+                <div class="u-name">{{item.name}} · {{item.create_time}}</div>
+                <div class="comment-detail">{{item.content}}</div>
+              </div>
+            </div>
+            <div class="comment-end">评论已加载完毕～</div>
+          </div>
+          <!-- 评论列表结束 -->
         </div>
         <div class="col-2"></div>
       </div>
@@ -122,10 +121,13 @@ import vBacktop from "../components/backtop";
 export default {
   data() {
     return {
+      comment:"",
       id: this.$route.query.id,
       question: {},
       answer: {},
-      login:true
+      login: true,
+      toptx: JSON.parse(localStorage.getItem("tx")),
+      data: {}
     };
   },
   created() {
@@ -141,51 +143,62 @@ export default {
   },
   created() {
     axios
-      .get("msg", {})
+      .post("http://10.12.80.203/api/question/question_details", {
+        id: this.id
+      })
       .then(res => {
-         this.answer = res.data.yonghu;
-        for (var i = 0; i < res.data.wd.length; i++) {
-          if (res.data.wd[i].id == this.id) {
-            this.question = res.data.wd[i];
-          }
-        }
+        this.question = res.data.question_details;
+        this.answer = res.data.answer_list;
+        this.data = res.data;
       })
       .catch(err => {});
   },
   methods: {
-      submit() {
+    submit() {
       if (document.getElementById("exampleFormControlTextarea1").value != "") {
         // 提交评论
         //msg换成后台地址
         axios
-          .post("msg", {
-            params: {
-              comment: this.comment,
-              //文章id
-              id: this.id,
-              //用户id
-              userid: userid
-            }
+          .post("http://10.12.80.203/api/question/add_answer", {
+            content: this.comment,
+            pid: this.id,
+            user_id: localStorage.getItem("userid")
           })
           .then(res => {
-             this.$message({
-          message: '发布成功！',
-          type: 'success',
-          offset:"80"
-        });
+            if (res.data.code) {
+              this.$message({
+                message: "发布成功！",
+                type: "success",
+                offset: "80"
+              });
+              this.comment=""
+              axios
+                .post("http://10.12.80.203/api/question/question_details", {
+                  id: this.id
+                })
+                .then(res => {
+                  this.answer = res.data.answer_list;
+                });
+            }else{
+               this.$message({
+              message: "评论失败！",
+              type: "warning",
+              offset: "80"
+            });
+            }
           })
           .catch(e => {
-           this.$message({
-          message: '评论失败！',
-          type: 'warning',
-          offset:"80"
-        });
+            this.$message({
+              message: "评论失败！",
+              type: "warning",
+              offset: "80"
+            });
           });
       } else {
         this.$message({
-          message: '评论不能为空',
-          type: 'warning',
-          offset:"80"
+          message: "评论不能为空",
+          type: "warning",
+          offset: "80"
         });
       }
     }
@@ -204,7 +217,7 @@ export default {
   position: relative;
   margin-bottom: 20px;
   .m-bottom {
-    color: #C9D6DE;
+    color: #c9d6de;
     float: right;
     margin-top: 10px;
     margin-bottom: 0px;
@@ -241,13 +254,13 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-          color: #C9D6DE;
+        color: #c9d6de;
         margin-bottom: 20px;
       }
       .content1 {
-          font-family:"PingFang SC";
-          
-          font-size: large;
+        font-family: "PingFang SC";
+
+        font-size: large;
         margin-bottom: 20px;
       }
     }
@@ -313,7 +326,7 @@ span {
 
 /* 评论列表 */
 .comment-list {
-    margin-top: 20px;
+  margin-top: 20px;
   color: #666666;
   margin-top: 0px;
   padding: 20px;
@@ -422,8 +435,8 @@ span {
 .new-list {
   border-bottom: 1px dashed #e5e5e5;
   margin-top: 50px;
-  h5{
-          font-size: 14px;
+  h5 {
+    font-size: 14px;
   }
 }
 </style>

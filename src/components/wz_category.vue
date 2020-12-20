@@ -58,7 +58,7 @@ export default {
         .then(res => {
           this.categorywz= this.categorywz.concat(res.data.article_list);
           this.page_count=res.data.total_page
-          console.log(res.data)
+          console.log( this.page_count)
         })
         .catch(e => {});
       // this.getDrawPrize({

@@ -22,7 +22,7 @@
       </div>
       <div class="reply">
         <div class="item" v-for="reply in item.children">
-          <div class="reply-content">
+          <div class="reply-content" >
             <span class="from-name">{{reply.send_name}}</span><span>: </span>
             <span class="to-name">@{{reply.receive}}</span>
             <span>{{reply.content}}</span>
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-
+import axios from "axios";
   import Vue from 'vue'
 
   export default {
@@ -108,7 +108,15 @@
        * 提交评论
        */
       commitComment() {
-        console.log(this.comments);
+      axios.post("http://10.12.80.203/api/Comment/add_Comment",{
+        send_user_id: localStorage.getItem("userid"),
+        // pid
+      }).then(res=>{
+
+      }).catch(err=>{
+
+      })
+        console.log(this.showItemId);
       },
 
       /**

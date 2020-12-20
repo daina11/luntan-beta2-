@@ -44,6 +44,7 @@
         </el-tab-pane>
         <el-tab-pane label="文章" name="second">
           <div>
+            <div v-if="wzshow">没有更多</div>
             <el-col :span="4" v-for="(item,index) in wz" :key="index">
               <el-card shadow="hover" @click.native="todetail(item.id)">
                 <el-image :src="item.background_img"></el-image>
@@ -53,18 +54,35 @@
             </el-col>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="评论" name="third">
+        <el-tab-pane label="闲置" name="third">
           <div>
-            <el-timeline reverse="true">
-              <el-timeline-item
+            <!-- <el-timeline reverse="true"> -->
+              <!-- <el-timeline-item
                 v-for="(item, index) in commentlist"
                 :key="index"
                 :timestamp="item.time"
               >{{item.content}}</el-timeline-item>
-            </el-timeline>
+            </el-timeline> -->
+            <div v-if="xzshow">没有更多</div>
+             <el-col :span="4" v-for="(item,index) in commentlist" :key="index">
+              <el-card shadow="hover" @click.native="toxianzhi(item.id)">
+                <el-image :src="item.img"></el-image>
+                <div class="title">{{item.title}}</div>
+                <div class="time">{{item.create_time}}</div>
+              </el-card>
+            </el-col>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="活动" name="fourth">没有更多了</el-tab-pane>
+        <el-tab-pane label="活动" name="fourth">
+            <div v-if="hdshow">没有更多</div>
+             <el-col :span="4" v-for="(item,index) in hd" :key="index">
+              <el-card shadow="hover" @click.native="tohuodong(item.id)">
+                <el-image :src="item.img"></el-image>
+                <div class="title">{{item.name}}</div>
+                <div class="time">{{item.start_time}}</div>
+              </el-card>
+            </el-col>
+        </el-tab-pane>
       </el-tabs>
     </div>
     <v-backtop></v-backtop>
@@ -88,6 +106,10 @@ export default {
       commentlist: "",
       wz: "",
       activeName: "first",
+      hd:{},
+      hdshow:true,
+      xzshow:true,
+      wzshow:true,
       formLabelAlign: {
        
       }
@@ -117,10 +139,10 @@ export default {
         // console.log(111)
         this.geren = res.data;
         this.sex = JSON.stringify(res.data.sex);
-       console.log( 11);
-        console.log(res.data);
+     
+      
         this.formLabelAlign=red.data
-        console.log(this.geren.avatar);
+      
       })
       .catch(err => {});
 
@@ -129,8 +151,46 @@ export default {
       .post("http://10.12.80.203/api/Article/get_article_list", {
         user_id: localStorage.getItem("userid")
       }).then(res=>{
-      
+          
+           if(res.data.code==1){
+         this.wzshow=false
+       }else{
+         this.wzshow=true
+       }
+        console.log( 11111111);
+            console.log(res.data)
         this.wz=res.data.article_list
+      }).catch(err=>{
+
+      })
+      //获取闲置
+      axios
+      .post("http://10.12.80.203/api/idle/get_idle_list", {
+        user_id: localStorage.getItem("userid")
+      }).then(res=>{
+       if(res.data.code==1){
+         this.xzshow=false
+       }else{
+         this.xzshow=true
+       }
+        this.commentlist=res.data.idle_list
+      
+      }).catch(err=>{
+
+      })
+       //获取活动
+      axios
+      .post("http://10.12.80.203/api/Activity/get_activity_list", {
+        user_id: localStorage.getItem("userid")
+      }).then(res=>{
+         
+           if(res.data.code==1){
+         this.hdshow=false
+       }else{
+         this.hdshow=true
+       }
+        this.hd=res.data.activity_list
+       
       }).catch(err=>{
 
       })
@@ -149,6 +209,19 @@ export default {
       //去到个人文章详情页
       this.$router.push({
         path: "article_detail",
+        query: { id: id }
+      });
+    },
+    toxianzhi(id) {
+      //去到个人文章详情页
+      this.$router.push({
+        path: "xianzhi_detail",
+        query: { id: id }
+      });
+    },
+    tohuodong(id){
+       this.$router.push({
+        path: "activity_detail",
         query: { id: id }
       });
     },

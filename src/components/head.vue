@@ -33,7 +33,7 @@
                     <i v-on:click="issearch = !issearch" class="sicon iconfont icon-search"></i>
                   </div>
                   <div class="login-text">
-                    <div class="msg">
+                    <!-- <div class="msg">
                       <el-popover
                         placement="bottom-start"
                         width="150"
@@ -45,7 +45,7 @@
                           <i class="ismsg iconfont icon-comment"></i>
                         </div>
                       </el-popover>
-                    </div>
+                    </div> -->
 
                     <div class="my">
                       <el-popover
@@ -72,7 +72,8 @@
                         </div>
 
                         <div slot="reference">
-                          <img :src="tx" alt />
+                             <el-avatar class="touxiang"size="30px" :src="tx"></el-avatar>
+                          <!-- <img :src="tx" alt /> -->
                         </div>
                       </el-popover>
                     </div>
@@ -89,9 +90,9 @@
             <b-col cols="8">
               <div class="showSearch">
                 <transition name="slide-fade">
-                  <form id="search_head_form" action="/search" v-if="issearch">
+                  <form id="search_head_form" action="/serch" v-if="issearch">
                     <div class="search-1">
-                      <i class="sicon iconfont icon-search"></i>
+                      <i class="sicon iconfont icon-search " @click="onSerch(this.sWorld)"> </i>
                     </div>
                     <div class="search-2">
                       <input
@@ -102,6 +103,8 @@
                         size="9"
                         id="headerSearch"
                         placeholder="搜索你感兴趣的..."
+                        v-model="sWorld"
+                        @keyup.enter="onSerch(this.sWorld)"
                       />
                     </div>
                     <div class="search-3" v-on:click="issearch = false" @click="showSearchMethods">
@@ -196,6 +199,7 @@ export default {
       dialogFormVisible: false,
       tx: JSON.parse(localStorage.getItem("tx")),
       userid:'',
+      sWorld:"",
       //登陆表单
       dlform: {
         uname: "",
@@ -229,6 +233,13 @@ export default {
     });
   },
   methods: {
+    onSerch(vl){
+      //搜索
+        this.$router.push({
+        path: "serch",
+        query: { vl: vl }
+      });
+    },
     logout() {
       //退出登陆
 
@@ -358,6 +369,9 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.touxiang{
+  margin-top: 10px;
+}
 .geren {
   margin-bottom: 10px;
   text-align: center;

@@ -21,17 +21,17 @@
           <div class="ask"><div>你想问什么？</div> <b-link href="/post_question" target="_blank"> <el-button type="primary" round>提问</el-button></b-link></div>
           <div class="wenti" v-for="(item,index) in wt"   @click="toDetail(item.id)">
             <el-card shadow="hover">
-              <div class="wt_title">{{item.title}}</div>
-              <div class="wt_detail">{{item.content}}</div>
+              <div class="wt_title">{{item.content}}</div>
+              <div class="wt_detail">{{item.description}}</div>
               <div class="wt_bottom">
                 <div>
                   <i class="iconfont icon-fabulous">
-                    <span>{{item.like}}</span>
+                    <span>{{item.like_num}}</span>
                   </i>
                 </div>
                 <div>
                   <i class="iconfont icon-comment">
-                    <span>{{item.pnumber}}</span>
+                    <span>{{item.comment_num}}</span>
                   </i>
                 </div>
                 <div>
@@ -43,21 +43,21 @@
               <!-- 精选评论 -->
               <div class="top-coment">
                 <div class="jx">精选评论</div>
-                <div class="jx-c">
+                <div class="jx-c" v-for="(item,index) in item.answer" :key="index">
                     <div class="tx">
-                         <img :src="item.cimg"></img>
+                         <img :src="item.avatar"></img>
                      <div>
                         <div class="c-name">
-                            {{item.cname}}
+                            {{item.responder}}
                         </div>
                         <div class="c-main">
-                            {{item.comment}}
+                            {{item.content}}
                         </div>
                     </div>
                     </div>
                    
                     <div class="c-time">
-                        {{item.time}}
+                        {{item.create_time}}
                     </div>
                 </div>
               </div>
@@ -66,6 +66,14 @@
         </div>
         <div class="col-2"></div>
       </div>
+          <b-button
+        pill
+        variant="outline-secondary"
+        class="load-more"
+        v-if="page<page_count"
+        @click="loadMore"
+      >加载更多...</b-button>
+      <b-button pill variant="outline-secondary" class="load-more" v-else>没有更多了</b-button>
     </div>
     <v-backtop></v-backtop>
     <v-footer></v-footer>
@@ -79,7 +87,10 @@ import vBacktop from "../components/backtop";
 export default {
   data() {
     return {
-      wt: {}
+      wt: {},
+       page: 1,
+      page_count:333,
+   
     };
   },
   components: {
@@ -89,13 +100,30 @@ export default {
   },
   created() {
     axios
-      .get("msg", {})
+      .post("http://10.12.80.203/api/Question/get_question_list", {})
       .then(res => {
-        this.wt = res.data.wd;
+        this.wt = res.data.question_list;
+        this.page_count=res.data.total_page;
+      
       })
       .catch(err => {});
   },
   methods: {
+      //下一页
+    loadMore(){
+       this.page += 1;
+       axios
+        .post("http://10.12.80.203/api/Question/get_question_list", {
+          
+            page: this.page
+          
+        })
+        .then(res => {
+          this.wt= this.wt.concat(res.data.question_list);
+          console.log(res.data)
+        })
+        .catch(e => {});
+    },
       toDetail(id){
           console.log(id)
         this.$router.push({
@@ -107,6 +135,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.load-more {
+  margin-top: 50px;
+  margin-left: 45%;
+  bottom: -50px;
+}
 .top-coment {
   padding: 20px;
   margin: 50px 20px 20px 20px;

@@ -1,8 +1,7 @@
 <template>
-
-    <div>
-        <v-head></v-head>
-         <div class="idle-top-wap">
+  <div>
+    <v-head></v-head>
+    <div class="idle-top-wap">
       <div class="idle-top">
         <div class="left">
           <h5>闲置</h5>
@@ -10,7 +9,7 @@
         </div>
         <div class="t_title">
           <i class="iconfont icon-smile"></i>
-          <span>收垃圾咯</span>
+          <span><el-link href="/post_xianzhi" target="_blank" :underline="false"><el-button type="primary" class="canjia"  round>发布垃圾</el-button></el-link></span>
         </div>
       </div>
     </div>
@@ -19,20 +18,27 @@
       <div class="row">
         <div class="col main">
           <!-- 活动卡片 -->
-          <el-col :span="6" v-for="(item,index) in xianzhi.slice(1 , 6)" :key="index">
+          <el-col :span="6" v-for="(item,index) in xianzhi" :key="index">
             <el-card shadow="hover" @click.native="todetail(item.id)">
-              <el-image :src="item.imgurl"></el-image>
+              <el-image :src="item.img"></el-image>
               <div class="title">{{item.title}}</div>
-              <div class="time">{{item.time}}</div>
+              <div class="time">{{item.update_time}}</div>
             </el-card>
           </el-col>
         </div>
       </div>
+      <b-button
+        pill
+        variant="outline-secondary"
+        class="load-more"
+        v-if="page<page_count"
+        @click="loadMore"
+      >加载更多...</b-button>
+      <b-button pill variant="outline-secondary" class="load-more" v-else>没有更多了</b-button>
     </div>
     <v-backtop></v-backtop>
     <v-footer></v-footer>
-    </div>
-
+  </div>
 </template>
 
 <script>
@@ -42,28 +48,58 @@ import vAdd from "../components/add_top";
 import vFooter from "../components/footer";
 import vBacktop from "../components/backtop";
 export default {
-    data(){
-        return{
-            xianzhi:{}
-        }
-    },created(){
-  axios
-      .get("msg", {})
+  data() {
+    return {
+      xianzhi: {},
+       page: 1,
+      page_count:333
+    };
+  },
+  created() {
+    axios
+      .post("http://10.12.80.203/api/idle/get_idle_list", {})
       .then(res => {
-        this.xianzhi = res.data.articles;
+        this.xianzhi = res.data.idle_list;
+         this.page_count=res.data.total_page
       })
       .catch(err => {});
-    },
-      components: {
+  },
+  components: {
     vHead,
     vAdd,
     vFooter,
-    vBacktop,
+    vBacktop
   },
-}
+  methods: {
+       todetail(id) {
+      //跳转闲置页面
+       this.$router.push({
+        path: "xianzhi_detail",
+        query: { id: id }
+      });
+    },
+    //下一页
+    loadMore() {
+      this.page += 1;
+      axios
+        .post("http://10.12.80.203/api/idle/get_idle_list", {
+          page: this.page
+        })
+        .then(res => {
+          this.xianzhi = this.xianzhi.concat(res.data.idle_list);
+          console.log(res.data);
+        })
+        .catch(e => {});
+    }
+  }
+};
 </script>
 <style scoped lang="scss">
-
+.load-more {
+  margin-top: 50px;
+  margin-left: 45%;
+  bottom: -50px;
+}
 .more {
   margin-top: 50px;
   margin-left: 50%;
@@ -82,7 +118,6 @@ export default {
       height: 185px;
     }
     .title {
-       
       font-family: PingFangSC-Medium;
       font-size: 16px;
       color: #333333;
@@ -91,8 +126,6 @@ export default {
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 1;
-    
-        
     }
     .time {
       font-size: 12px;

@@ -17,11 +17,11 @@
       <div class="row">
         <div class="col main">
           <!-- 活动卡片 -->
-          <el-col :span="12" v-for="(item,index) in huodong.slice(1 , 6)" :key="index">
+          <el-col :span="12" v-for="(item,index) in huodong" :key="index">
             <el-card shadow="hover" @click.native="todetail(item.id)">
-              <el-image :src="item.imgurl"></el-image>
-              <div class="title">{{item.title}}</div>
-              <div class="time">{{item.time}}</div>
+              <el-image :src="item.img"></el-image>
+              <div class="title">{{item.name}}</div>
+              <div class="time">{{item.start_time}}</div>
             </el-card>
           </el-col>
         </div>
@@ -54,14 +54,15 @@ export default {
     return {
       huodong: {},
       page: 1,
-      page_count: 2
+      page_count: 333
     };
   },
   created() {
     axios
-      .get("msg", {})
+      .post("http://10.12.80.203/api/Activity/get_activity_list", {})
       .then(res => {
-        this.huodong = res.data.articles;
+        this.huodong = res.data.activity_list;
+        this.page_count=res.data.total_page
       })
       .catch(err => {});
   },
@@ -72,8 +73,20 @@ export default {
     vBacktop
   },
   methods: {
-    loadMore() {
-      console.log(11);
+    //下一页
+    loadMore(){
+       this.page += 1;
+       axios
+        .post("http://10.12.80.203/api/Activity/get_activity_list", {
+          
+            page: this.page
+          
+        })
+        .then(res => {
+          this.huodong= this.huodong.concat(res.data.activity_list);
+          console.log(res.data.activity_list)
+        })
+        .catch(e => {});
     },
     todetail(id) {
       this.$router.push({

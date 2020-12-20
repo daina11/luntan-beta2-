@@ -17,11 +17,29 @@ import xianzhi from '@/pages/xianzhi'
 import my_detail from '@/pages/my_detail'
 import connectUs from '@/pages/connectUs'
 import aboutUs from '@/pages/aboutUs'
+import xianzhi_detail from '@/pages/xianzhi_detail'
+import post_xianzhi from '@/pages/post_xianzhi'
+import serch from '@/pages/serch'
 Vue.use(Router)
 
 export default new Router({
   mode: 'history',
   routes: [
+    {
+      path: '/serch',
+      name: 'serch',
+      component: serch
+    },
+    {
+      path: '/post_xianzhi',
+      name: 'post_xianzhi',
+      component: post_xianzhi
+    },
+    {
+      path: '/xianzhi_detail',
+      name: 'xianzhi_detail',
+      component: xianzhi_detail
+    },
     {
       path: '/aboutUs',
       name: 'aboutUs',

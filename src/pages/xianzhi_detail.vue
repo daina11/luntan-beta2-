@@ -4,12 +4,12 @@
     <div class="idle-top-wap">
       <div class="idle-top">
         <div class="left">
-          <h5>活动</h5>
-          <span>欢聚·欢笑·兴趣</span>
+          <h5>闲置</h5>
+          <span>交换垃圾</span>
         </div>
         <div class="t_title">
           <i class="iconfont icon-smile"></i>
-          <span>我都想笑了</span>
+          <span>你的垃圾真好用</span>
         </div>
       </div>
     </div>
@@ -19,24 +19,24 @@
         <div class="col-2"></div>
         <div class="col-8">
           <div class="top">
-            <div class="title">{{activity.name}}</div>
-            <div class="ptime">发布时间：{{activity.start_time}}</div>
+            <div class="title">{{activity.title}}</div>
+            <div class="ptime">发布时间：{{activity.update_time}}</div>
+            <div class="ptime">发布人：{{activity.user_name}}</div>
           </div>
           <div class="center">
-            <span>活动时间</span>
-            <div>开始时间：{{activity.start_time}}</div>
-            <div>结束时间：{{activity.end_time}}</div>
-            <div class="rs">招募人数</div>
-            <div>{{activity.join_num}}人</div>
-            <div class="dz">地址</div>
-            <div>{{activity.address}}</div>
+            <span>垃圾描述</span>
+            <div>{{activity.description}}</div>
+            
+           
+            <div class="dz">价格</div>
+            <div>{{activity.price}}</div>
           </div>
           <div class="bottom">
-            <div class="b-top">活动介绍</div>
+            <div class="b-top">垃圾介绍</div>
             <div class="b-main">
               <div v-html="activity.content"></div>
             </div>
-            <el-button v-if="isjion==false" type="primary" @click="canjia" class="canjia" round>参加活动</el-button>
+            <el-link :href="activity.link" target="_blank" :underline="false"><el-button type="primary" class="canjia"  round>购买</el-button></el-link>
             <!-- <el-button  type="primary" @click="canjia" class="canjia" round>已参加</el-button> -->
           </div>
           <div class="col-2"></div>
@@ -64,12 +64,12 @@ export default {
   },
   created() {
     axios
-      .post("http://10.12.80.203/api/Activity/activity_details", {
+      .post("http://10.12.80.203/api/Idle/idle_details", {
         user_id: localStorage.getItem("userid"),
         id: this.id
       })
       .then(res => {
-        this.activity = res.data.article_details;
+        this.activity = res.data.idle_details;
       })
       .catch(err => {});
   },
@@ -80,74 +80,16 @@ export default {
     vBacktop
   },
   methods: {
-    canjia() {
-      console.log(this.activity.is_join);
-      if (this.activity.is_join == 0) {
-        this.$message({
-          message: "你已经参加过本次活动啦！",
-          type: "warning",
-          offset: "80"
-        });
-      } else {
-        axios
-          .post("http://10.12.80.203/api/Activity/activity_details", {
-            user_id: localStorage.getItem("userid"),
-            id: this.id
-          })
-          .then(res => {
-            this.activity = res.data.article_details;
-            if (this.activity.is_join == 0) {
-              this.$message({
-                message: "你已经参加过本次活动啦！",
-                type: "warning",
-                offset: "80"
-              });
-            } else {
-              axios
-                .post("http://10.12.80.203/api/Activity/join_activity", {
-                  user_id: localStorage.getItem("userid"),
-                  id: this.id
-                })
-                .then(res => {
-                  if (localStorage.getItem("login")) {
-                    if (res.data.code) {
-                      this.$message({
-                        message: "参加成功！",
-                        type: "success",
-                        offset: "80"
-                      });
-                    } else {
-                      this.$message({
-                        message: "参加失败",
-                        type: "warning",
-                        offset: "80"
-                      });
-                    }
-                  } else {
-                    this.$message({
-                      message: "请先登陆！",
-                      type: "warning",
-                      offset: "80"
-                    });
-                  }
-                })
-                .catch(err => {
-                  this.$message({
-                    message: "参加失败",
-                    type: "warning",
-                    offset: "80"
-                  });
-                });
-            }
-          });
+      canjia(){
+
       }
-    }
   }
 };
 </script>
 <style scoped lang="scss">
 .canjia {
-  margin-left: 40%;
+margin-top: 50px;
+  margin-left: 300%;
 }
 .container {
   margin-top: 20px;

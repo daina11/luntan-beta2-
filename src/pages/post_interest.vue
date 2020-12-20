@@ -15,29 +15,30 @@
     </div>
 
     <div class="container">
-    <div class="main-content">
+      <div class="main-content">
         <h5>请输入你要发布的内容：</h5>
-      <el-input
-        type="textarea"
-        placeholder="请输入内容"
-        v-model="textarea"
-        maxlength="200"
-        show-word-limit
-        resize="none"
-        rows="5"
-        :limit="9"
-      ></el-input>
-          <el-upload
-            action="http://10.12.80.203/api/base/upload"
-             :show-file-list="true"
-              list-type="picture-card"
-            :accept="'image/*'"
-            :on-success="handleSuccess"
-          >
-            <el-button type="primary" size="medium" @click="postimg">上传图片</el-button>
-          </el-upload>
-      <el-button @click="sub">提交</el-button>
-    </div>
+        <el-input
+          type="textarea"
+          placeholder="请输入内容"
+          v-model="textarea"
+          maxlength="200"
+          show-word-limit
+          resize="none"
+          rows="5"
+         
+        ></el-input>
+        <el-upload
+          action="http://10.12.80.203/api/base/upload"
+          :show-file-list="true"
+          list-type="picture-card"
+          :accept="'image/*'"
+          :on-success="handleSuccess"
+           :limit="9"
+        >
+          <el-button type="primary" size="medium" >上传图片</el-button>
+        </el-upload>
+        <el-button @click="sub"  type="primary" class="sub">发布兴趣</el-button>
+      </div>
     </div>
     <v-footer></v-footer>
   </div>
@@ -54,8 +55,8 @@ import vFuwenben from "../components/fuwenben";
 export default {
   data() {
     return {
-        textarea: '',
-        fileList:[]
+      textarea: "",
+      fileList: []
     };
   },
   components: {
@@ -66,9 +67,9 @@ export default {
   },
   created() {},
   methods: {
-       handleSuccess: function(result) {
-      this.fileList.push(result.data[0])
-      console.log(result.data[0]);
+    handleSuccess: function(result) {
+      this.fileList.push(result.data[0]);
+      console.log(this.fileList);
     },
     //上传图片
     // postimg(){
@@ -81,38 +82,69 @@ export default {
     //   })
     // },
     //上传内容和返回的图片连接
-      sub(){
-         if(  localStorage.getItem("login")==null|| localStorage.getItem("login")=='false'){
-         this.$message({
-          message: '请先登陆！',
-          type: 'warning',
-          offset:"80"
+    sub() {
+      if (
+        localStorage.getItem("login") == null ||
+        localStorage.getItem("login") == "false"
+      ) {
+        this.$message({
+          message: "请先登陆！",
+          type: "warning",
+          offset: "80"
         });
-      }else{
-        axios.post("http://10.12.181.136/api/base/upload",{
-          data:{
-            imgurl:this.fileList,
-            text:this.textarea
-          }
-        }).then(res=>{
-
-        }).catch(err=>{
-
-        })
+      } else {
+  
+       axios.post("http://10.12.80.203/api/interest/add_interest", {
+         
+              img: this.fileList,
+              content: this.textarea,
+              user_id:localStorage.getItem("userid")
+            
+          })
+          .then(res => {
+            
+            if (res.data.code) {
+              this.$message({
+                message: "发布成功！",
+                type: "success",
+                offset: "80"
+              });
+              this.textarea=""
+              this.fileList=null
+            } else {
+              this.$message({
+                message: "发布失败",
+                type: "warning",
+                offset: "80"
+              });
+               
+            }
+          })
+          .catch(err => {
+            this.$message({
+              message: "发布失败",
+              type: "warning",
+              offset: "80"
+            });
+            
+          });
       }
-        
-          console.log(this.textarea)
-      }
+
+      console.log(this.textarea);
+    }
   }
 };
 </script>
 <style scoped lang="scss">
-.container{
-    .main-content{
-        margin-top: 100px;
-        margin-left: 25%;
-        width: 500px;
-    }
+.sub{
+  margin-left: 50%;
+}
+.container {
+  .main-content {
+    margin-top: 100px;
+    margin-left: 25%;
+    width: 500px;
+  }
 }
 .idle-top-wap {
   margin-top: 60px;
